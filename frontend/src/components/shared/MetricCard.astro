@@ -1,0 +1,32 @@
+---
+interface Props {
+  title: string;
+  value: string;
+  subtitle?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  icon?: string; // e.g., an emoji like "📈" or "💤"
+}
+const { title, value, subtitle, trend = 'neutral', icon } = Astro.props;
+
+const trendColors = {
+  up: 'text-sage-600',
+  down: 'text-plum-600',
+  neutral: 'text-slate-500'
+};
+---
+
+<div class="card flex flex-col gap-2">
+  <dt class="text-sm font-medium text-slate-500 flex items-center gap-2">
+    {icon && <span class="text-lg">{icon}</span>}
+    {title}
+  </dt>
+  <dd class="flex items-baseline gap-2">
+    <span class="text-3xl font-semibold text-slate-900">{value}</span>
+    {trend !== 'neutral' && (
+      <span class={`text-sm font-medium ${trendColors[trend]}`}>
+        {trend === 'up' ? '↑' : '↓'}
+      </span>
+    )}
+  </dd>
+  {subtitle && <dd class="text-xs text-slate-500">{subtitle}</dd>}
+</div>

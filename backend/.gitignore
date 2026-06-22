@@ -1,0 +1,65 @@
+# ==========================
+# Python & Virtual Environment
+# ==========================
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==========================
+# Environment Variables (SECRETS)
+# ==========================
+.env
+.env.local
+.env.production
+
+# ==========================
+# AI Models (CRITICAL: Do not commit 600MB+ of model weights)
+# ==========================
+app/ml_models/model_cache/
+*.bin
+*.safetensors
+*.onnx
+*.pt
+*.pth
+
+# ==========================
+# Database
+# ==========================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================
+# Logs & Generated Reports
+# ==========================
+*.log
+logs/
+*.pdf
+*.csv
+
+# ==========================
+# IDE & OS Files
+# ==========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

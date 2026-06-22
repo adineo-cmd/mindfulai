@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Journal from '../components/journal/Journal.tsx';
+---
+
+<BaseLayout title="Mood Journal">
+  {/* 
+    FIX: We use client:load because the user needs to interact 
+    with the form and see immediate feedback. 
+  */}
+  <Journal client:load />
+</BaseLayout>

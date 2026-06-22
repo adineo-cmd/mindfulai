@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Home">
+  <section class="relative isolate overflow-hidden bg-warm-50 py-24 sm:py-32">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl text-center">
+        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+          Gentle, AI-powered <span class="text-sage-600">wellness tracking</span>
+        </h1>
+        <p class="mt-6 text-lg leading-8 text-slate-600">
+          Understand your emotional patterns with privacy-first tools. 
+          Track your mood, journal your thoughts, and receive compassionate, 
+          non-judgmental support tailored to your needs.
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+          <a href="/dashboard" class="btn-primary px-8 py-3 text-base">Get Started</a>
+          <a href="/journal" class="text-sm font-semibold leading-6 text-slate-900 hover:text-sage-600 transition-colors">Try the Journal <span aria-hidden="true">→</span></a>
+        </div>
+        
+        <div class="mt-8 rounded-xl bg-amber-50 border border-amber-200 p-4 text-left max-w-xl mx-auto">
+          <p class="text-sm text-amber-800">
+            <strong>Disclaimer:</strong> This tool supports wellness tracking and is not a substitute for professional diagnosis or treatment. If you are in crisis, please contact emergency services.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-24 bg-white">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl lg:text-center mb-16">
+        <h2 class="text-base font-semibold leading-7 text-sage-600">How it works</h2>
+        <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Designed for your peace of mind</p>
+      </div>
+      <div class="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
+        {[
+          { title: 'Private Tracking', desc: 'Your data stays yours. We process sensitive inputs locally whenever possible and encrypt everything else.' },
+          { title: 'Compassionate AI', desc: 'Our companion is trained to listen, validate, and offer evidence-based coping strategies, not to diagnose.' },
+          { title: 'Actionable Insights', desc: 'Visualize your emotional trends over time to identify triggers and celebrate periods of stability.' }
+        ].map(feature => (
+          <div class="card hover:shadow-md transition-shadow">
+            <h3 class="text-lg font-semibold text-slate-900">{feature.title}</h3>
+            <p class="mt-2 text-sm text-slate-600 leading-relaxed">{feature.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

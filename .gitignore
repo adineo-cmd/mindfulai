@@ -1,0 +1,46 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Virtual environments
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Node modules
+node_modules/
+dist/
+.astro/
+
+# Environment variables (SECRETS)
+.env
+.env.local
+.env.production
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# AI Models (CRITICAL: Do not commit 600MB+ of model weights)
+app/ml_models/model_cache/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Logs
+*.log
+logs/
+
+# Build files
+build/
+*.egg-info/

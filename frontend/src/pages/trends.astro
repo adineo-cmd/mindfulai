@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MoodHeatmap from '../components/charts/MoodHeatmap.tsx';
+import CorrelationInsights from '../components/charts/CorrelationInsights.tsx';
+import ExportButtons from '../components/shared/ExportButtons.tsx';
+---
+
+<BaseLayout title="Trends & Insights">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">Analytics & Insights</h1>
+        <p class="text-slate-600 mt-1">Long-term patterns in your wellness journey.</p>
+      </div>
+      
+      <!-- FIX: Use the React component to handle the downloads -->
+      <ExportButtons client:load />
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <MoodHeatmap client:visible />
+      
+      <!-- FIX: Use the React component to fetch and calculate real correlation data -->
+      <CorrelationInsights client:visible />
+    </div>
+  </div>
+</BaseLayout>

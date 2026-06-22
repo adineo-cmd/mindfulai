@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DashboardMetrics from '../components/shared/DashboardMetrics.tsx'; // Import the new React component
+import MoodTrendChart from '../components/charts/MoodTrendChart.tsx';
+import EmotionDistributionChart from '../components/charts/EmotionDistributionChart.tsx';
+---
+
+<BaseLayout title="Dashboard">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-slate-900">Welcome back</h1>
+      <p class="text-slate-600 mt-1">Here is an overview of your wellness journey.</p>
+    </div>
+
+    <!-- FIX: Use the dynamic React island instead of hardcoded Astro cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <DashboardMetrics client:load />
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 h-[400px]">
+        <MoodTrendChart client:visible />
+      </div>
+      <div class="h-[400px]">
+        <EmotionDistributionChart client:visible />
+      </div>
+    </div>
+
+    <div class="mt-8 card bg-sage-50 border-sage-200">
+      <h3 class="text-sm font-semibold text-sage-900 mb-2">How is the Risk Indicator computed?</h3>
+      <p class="text-sm text-sage-800 leading-relaxed">
+        This is a simple, transparent metric combining your self-reported mood scores, journal sentiment analysis, and frequency of check-ins. 
+        It is designed to gently prompt you to seek support if patterns indicate prolonged distress. It is <strong>not</strong> a clinical diagnosis.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

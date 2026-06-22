@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SettingsManager from '../components/settings/SettingsManager.tsx';
+---
+
+<BaseLayout title="Settings & Privacy">
+  <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 py-10">
+    <h1 class="text-2xl font-bold text-slate-900 mb-2">Settings & Privacy</h1>
+    <p class="text-slate-600 mb-8">Manage your data and consent preferences. We believe in radical transparency.</p>
+
+    {/* FIX: Use the React island to handle the API calls and state */}
+    <SettingsManager client:load />
+  </div>
+</BaseLayout>

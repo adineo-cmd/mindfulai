@@ -223,7 +223,7 @@ Mindfulai was built with privacy as a hard constraint, not an afterthought.
 
 This is a final-year academic project. The codebase is production-structured but the following are known limitations for a real deployment:
 
-- The chat module uses `gpt-3.5-turbo` (OpenAI) and gracefully degrades to a mock response without an API key.
+- The chat module uses `tinyllama` (Ollama) and gracefully degrades to a mock response without an API key.
 - ML models are downloaded from HuggingFace on first inference. In production, pre-warm `model_cache` during startup.
 - Auth endpoints exist but the demo stubs use `user_id = 1`. Wire in `get_current_user` (marked in comments) for real authentication.
 

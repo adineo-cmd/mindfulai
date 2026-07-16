@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from io import BytesIO
 
 from app.db.session import get_db
+from app.models import text_emotion_record, facial_emotion_record
 from app.services.analytics_service import analytics_service
 from app.services.pdf_export_service import pdf_export_service
 
@@ -14,16 +16,59 @@ router = APIRouter(prefix="/api/mood", tags=["analytics"])
 @router.get("/trends")
 def get_trends(days: int = Query(default=7, le=365), db: Session = Depends(get_db)):
     """Get mood trend data for line charts (7, 30, or 90 days)."""
-    user_id = 1  # Replace with actual user ID from JWT in production
+    user_id = 1
     data = analytics_service.get_mood_trends(db, user_id=user_id, days=days)
     return {"status": "success", "data": data}
 
 @router.get("/emotions")
-def get_emotions(db: Session = Depends(get_db)):
-    """Get emotion distribution data for pie/donut charts."""
+def get_emotions(
+    source: str = "all",  # "all", "text", or "facial"
+    db: Session = Depends(get_db)
+):
+    """Get emotion distribution data"""
     user_id = 1
-    data = analytics_service.get_emotion_distribution(db, user_id=user_id)
+    
+    if source == "text":
+        data = analytics_service.get_text_emotion_distribution(db, user_id)
+    elif source == "facial":
+        data = analytics_service.get_facial_emotion_distribution(db, user_id)
+    else:
+        # "all" - combine both
+        data = analytics_service.get_combined_emotion_distribution(db, user_id)
+    
     return {"status": "success", "data": data}
+
+@router.get("/emotions/text")
+def get_text_emotions(db: Session = Depends(get_db)):
+    """Get emotion distribution from text analysis only"""
+    user_id = 1
+    records = db.query(
+        text_emotion_record.TextEmotionRecord.emotion_label,
+        func.count(text_emotion_record.TextEmotionRecord.id).label('count')
+    ).filter(
+        text_emotion_record.TextEmotionRecord.user_id == user_id
+    ).group_by(text_emotion_record.TextEmotionRecord.emotion_label).all()
+    
+    return {
+        "status": "success",
+        "data": [{"name": r.emotion_label.capitalize(), "value": r.count} for r in records]
+    }
+
+@router.get("/emotions/facial")
+def get_facial_emotions(db: Session = Depends(get_db)):
+    """Get emotion distribution from facial analysis only"""
+    user_id = 1
+    records = db.query(
+        facial_emotion_record.FacialEmotionRecord.emotion_label,
+        func.count(facial_emotion_record.FacialEmotionRecord.id).label('count')
+    ).filter(
+        facial_emotion_record.FacialEmotionRecord.user_id == user_id
+    ).group_by(facial_emotion_record.FacialEmotionRecord.emotion_label).all()
+    
+    return {
+        "status": "success",
+        "data": [{"name": r.emotion_label.capitalize(), "value": r.count} for r in records]
+    }
 
 # --- Advanced Analytics Data ---
 
@@ -31,7 +76,6 @@ def get_emotions(db: Session = Depends(get_db)):
 def get_heatmap(db: Session = Depends(get_db)):
     """Get weekly mood heatmap data for the calendar view."""
     user_id = 1
-    # You will need to add get_heatmap_data to your analytics_service
     data = analytics_service.get_heatmap_data(db, user_id=user_id)
     return {"status": "success", "data": data}
 
@@ -77,7 +121,6 @@ def export_wellness_report_pdf(
 def export_data_csv(db: Session = Depends(get_db)):
     """Export raw mood and journal data as CSV."""
     user_id = 1
-    # You will need to add get_csv_data to your analytics_service
     csv_data = analytics_service.get_csv_data(db, user_id=user_id)
     
     return StreamingResponse(

@@ -19,21 +19,23 @@ class ModelCache:
     def load_text_emotion(self):
         if not self.text_emotion_pipeline:
             logger.info("Loading text emotion model...")
+            # ✅ FIX: Remove cache_dir from pipeline(), use model_kwargs instead
             self.text_emotion_pipeline = pipeline(
                 "text-classification", 
                 model="j-hartmann/emotion-english-distilroberta-base", 
                 return_all_scores=True,
-                cache_dir=LOCAL_CACHE_DIR  # <-- Tells it to use your folder
+                model_kwargs={"cache_dir": LOCAL_CACHE_DIR}  # ✅ Pass via model_kwargs
             )
         return self.text_emotion_pipeline
 
     def load_facial_emotion(self):
         if not self.facial_emotion_pipeline:
             logger.info("Loading facial emotion model...")
+            # ✅ FIX: Remove cache_dir entirely, or use model_kwargs
             self.facial_emotion_pipeline = pipeline(
                 "image-classification", 
                 model="trpakov/vit-face-expression",
-                cache_dir=LOCAL_CACHE_DIR  # <-- Tells it to use your folder
+                model_kwargs={"cache_dir": LOCAL_CACHE_DIR}  # ✅ Pass via model_kwargs
             )
         return self.facial_emotion_pipeline
 

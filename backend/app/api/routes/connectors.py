@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.connector import ConnectorConnectRequest, ConnectorSyncRequest
 from app.services.connector_service import connector_service
+from app.models.external_source import ExternalSource
 
 router = APIRouter(prefix="/api/connectors", tags=["connectors"])
 
@@ -10,6 +11,29 @@ router = APIRouter(prefix="/api/connectors", tags=["connectors"])
 def get_available_connectors():
     """Get list of available external data sources"""
     return {"connectors": connector_service.get_available_connectors()}
+
+@router.get("/sources")
+def get_connected_sources(db: Session = Depends(get_db)):
+    """Get all connected sources for current user"""
+    user_id = 1  # Replace with actual user from JWT
+    
+    sources = db.query(ExternalSource).filter(
+        ExternalSource.user_id == user_id,
+        ExternalSource.is_connected == True
+    ).all()
+    
+    return {
+        "sources": [
+            {
+                "id": source.id,
+                "source_type": source.source_type,
+                "source_name": source.source_name,
+                "is_connected": source.is_connected,
+                "last_sync": source.last_sync.isoformat() if source.last_sync else None
+            }
+            for source in sources
+        ]
+    }
 
 @router.post("/connect")
 def connect_source(request: ConnectorConnectRequest, db: Session = Depends(get_db)):

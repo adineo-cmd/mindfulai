@@ -44,7 +44,12 @@ async def facial_emotion_ws(websocket: WebSocket):
                         "timestamp": current_time
                     })
                 else:
-                    await websocket.send_json({"error": "No face detected"})
+                    # FIX: Changed from {"error": "No face detected"} to consistent format
+                    await websocket.send_json({
+                        "emotion": "No face detected",
+                        "confidence": 0.0,
+                        "timestamp": current_time
+                    })
                     
                 last_inference_time = current_time
             else:

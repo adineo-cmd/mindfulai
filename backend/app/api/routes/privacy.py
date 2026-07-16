@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.models import mood_log, text_emotion_record, facial_emotion_record, chat_message, consent_record
+from app.models import mood_log, text_emotion_record, facial_emotion_record, consent_record
 from app.schemas.privacy import ConsentUpdate
 
 # FIX: Changed prefix from /api/user to /api/privacy

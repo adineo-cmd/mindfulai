@@ -4,18 +4,18 @@ from app.core.config import settings
 from app.db.base import Base
 from app.db.session import engine
 
-# Import ALL route modules (FIX: Added 'connectors')
+# Import ALL route modules (Removed 'chat')
 from app.api.routes import (
     auth,
-    chat,
     mood_logs,
     analytics,
     privacy,
-    connectors,  # <-- ADDED THIS
+    connectors,
     text_emotion,
-    facial_emotion
+    facial_emotion,
+    pi_camera
 )
-from app.websocket import facial_stream
+from app.websocket import facial_stream, pi_camera as pi_camera_ws
 
 # Create tables on startup
 Base.metadata.create_all(bind=engine)
@@ -35,16 +35,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include ALL routers (FIX: Added 'connectors')
+# Include ALL routers (Removed 'chat')
 app.include_router(auth.router)
-app.include_router(chat.router)
 app.include_router(mood_logs.router)
 app.include_router(analytics.router)
 app.include_router(privacy.router)
-app.include_router(connectors.router)  # <-- ADDED THIS
+app.include_router(connectors.router)
 app.include_router(text_emotion.router)
 app.include_router(facial_emotion.router)
 app.include_router(facial_stream.router)
+app.include_router(pi_camera.router)
+app.include_router(pi_camera_ws.router)
 
 @app.get("/health")
 def health_check():

@@ -66,26 +66,25 @@ export default function CorrelationInsights() {
 
   return (
     <div className="card">
-      <h3 className="text-sm font-semibold text-slate-900 mb-4">Mood vs. Facial Emotion Correlation</h3>
+      <h3 className="text-sm font-semibold text-cream mb-4">Mood vs. Facial Emotion Correlation</h3>
       
       {loading ? (
-        <div className="flex items-center justify-center py-8 text-slate-400">
+        <div className="flex items-center justify-center py-8 text-cream3">
           <Loader2 className="h-5 w-5 animate-spin mr-2" /> Calculating correlation...
         </div>
       ) : stats.length === 0 ? (
-        <p className="text-sm text-slate-500 text-center py-8">Not enough data to calculate correlation yet.</p>
+        <p className="text-sm text-cream3 text-center py-8">Not enough data to calculate correlation yet.</p>
       ) : (
         <div className="space-y-4">
-          {/* FIX: Added the missing 'key' prop here */}
           {stats.map((stat, index) => (
             <div key={index}>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-slate-700">{stat.label}</span>
-                <span className="font-medium text-slate-900">{stat.val}%</span>
+                <span className="text-cream2">{stat.label}</span>
+                <span className="font-medium text-amber2">{stat.val}%</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2">
+              <div className="w-full bg-bg4 rounded-full h-2">
                 <div 
-                  className="bg-plum-500 h-2 rounded-full transition-all duration-1000" 
+                  className="bg-green h-2 rounded-full transition-all duration-1000" 
                   style={{ width: `${stat.val}%` }}
                 />
               </div>
@@ -94,7 +93,7 @@ export default function CorrelationInsights() {
         </div>
       )}
       
-      <p className="text-xs text-slate-500 mt-4 italic">
+      <p className="text-xs text-cream3 mt-4 italic">
         Note: Discrepancies are normal and often indicate moments where we mask our true feelings. 
         This is a prompt for gentle self-reflection, not a cause for alarm.
       </p>

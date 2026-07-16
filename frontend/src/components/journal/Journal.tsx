@@ -1,163 +1,350 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, CheckCircle, BookOpen } from 'lucide-react';
+import { ExternalLink, CheckCircle, RefreshCw, Loader2, BookOpen, XCircle } from 'lucide-react';
 import { api } from '../../lib/apiClient';
 
-interface JournalEntry {
+interface Connector {
+  name: string;
+  icon: string;
+  oauth_required: boolean;
+}
+
+interface ConnectedSource {
   id: number;
-  mood_score: number;
-  note: string;
+  source_type: string;
+  source_name: string;
+  is_connected: boolean;
+  last_sync?: string;
+}
+
+interface ImportedNote {
+  id: number;
+  title: string;
+  content: string;
+  source: string;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment_score: number;
   created_at: string;
 }
 
 export default function Journal() {
-  // Form State
-  const [mood, setMood] = useState(3);
-  const [entry, setEntry] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
+  const [availableConnectors, setAvailableConnectors] = useState<Record<string, Connector>>({});
+  const [connectedSources, setConnectedSources] = useState<ConnectedSource[]>([]);
+  const [importedNotes, setImportedNotes] = useState<ImportedNote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState<number | null>(null);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [authCode, setAuthCode] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState<string | null>(null);
 
-  // History State
-  const [history, setHistory] = useState<JournalEntry[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(true);
-
-  // Fetch real journal history on load
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const res = await api.getJournalHistory();
-        setHistory(res.data || []);
-      } catch (err) {
-        console.error('Failed to fetch journal history', err);
-      } finally {
-        setLoadingHistory(false);
-      }
-    };
-    fetchHistory();
+    loadData();
   }, []);
 
-  // Handle form submission via API
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Stop standard HTML form submission!
-    if (!entry.trim()) return;
-
-    setIsSubmitting(true);
-    setSuccessMsg('');
-
+  const loadData = async () => {
     try {
-      // FIX: Sends JSON and includes the JWT token automatically!
-      await api.submitJournal({ 
-        mood_score: mood, 
-        note: entry 
-      });
+      setLoading(true);
       
-      setSuccessMsg('Entry saved successfully. Thank you for sharing.');
-      setEntry(''); // Clear textarea
-      setMood(3);  // Reset slider
-
-      // Refresh the history list
-      const res = await api.getJournalHistory();
-      setHistory(res.data || []);
+      // Load available connectors
+      const connectorsRes = await api.getAvailableConnectors();
+      setAvailableConnectors(connectorsRes.connectors || {});
+      
+      // Load connected sources (you'll need to add this endpoint)
+      try {
+        const sourcesRes = await api.getConnectedSources();
+        setConnectedSources(sourcesRes.sources || []);
+      } catch (err) {
+        console.log('No connected sources yet');
+      }
+      
+      // Load imported notes
+      const notesRes = await api.getImportedNotes();
+      setImportedNotes(notesRes.notes || []);
+      
     } catch (err) {
-      console.error('Failed to save journal entry', err);
-      setSuccessMsg('Failed to save. Please try again.');
+      console.error('Failed to load data:', err);
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  // Helper to format dates nicely
+  const connectSource = async (sourceType: string) => {
+    setConnecting(sourceType);
+    setShowAuthModal(sourceType);
+  };
+
+  const handleConnect = async (sourceType: string) => {
+    try {
+      const result = await api.connectSource({
+        source_type: sourceType,
+        auth_code: authCode || 'mock_token'
+      });
+      
+      // Add to connected sources
+      setConnectedSources(prev => [...prev, {
+        id: result.id,
+        source_type: result.source_type,
+        source_name: result.source_name,
+        is_connected: result.is_connected
+      }]);
+      
+      setShowAuthModal(null);
+      setAuthCode('');
+    } catch (err) {
+      console.error('Failed to connect:', err);
+    } finally {
+      setConnecting(null);
+    }
+  };
+
+  const syncSource = async (sourceId: number) => {
+    setSyncing(sourceId);
+    try {
+      const result = await api.syncSource({ source_id: sourceId });
+      
+      // Update last sync time
+      setConnectedSources(prev => 
+        prev.map(source => 
+          source.id === sourceId 
+            ? { ...source, last_sync: result.last_sync }
+            : source
+        )
+      );
+      
+      // Reload notes
+      const notesRes = await api.getImportedNotes();
+      setImportedNotes(notesRes.notes || []);
+      
+    } catch (err) {
+      console.error('Failed to sync:', err);
+    } finally {
+      setSyncing(null);
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleString('en-US', { 
-      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+      month: 'short', 
+      day: 'numeric', 
+      hour: 'numeric', 
+      minute: '2-digit' 
     });
   };
 
+  const getSentimentColor = (sentiment: string) => {
+    switch (sentiment) {
+      case 'positive': return 'text-green';
+      case 'negative': return 'text-red';
+      default: return 'text-amber';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex items-center justify-center py-20 text-cream3">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          Loading journal integrations...
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Daily Journal</h1>
-      
-      {/* Journal Form */}
-      <div className="card mb-8">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="mood" className="block text-sm font-medium text-slate-700 mb-2">
-              How are you feeling right now? (1-5)
-            </label>
-            <input 
-              type="range" 
-              id="mood" 
-              value={mood} 
-              onChange={(e) => setMood(parseInt(e.target.value))}
-              min="1" 
-              max="5" 
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sage-600" 
-            />
-            <div className="flex justify-between text-xs text-slate-500 mt-1">
-              <span>Very Low</span>
-              <span>Neutral</span>
-              <span>Very High</span> {/* FIX: Added missing > */}
-            </div>
-          </div>
-          
-          <div>
-            <label htmlFor="entry" className="block text-sm font-medium text-slate-700 mb-2">
-              What's on your mind?
-            </label>
-            <textarea 
-              id="entry" 
-              value={entry}
-              onChange={(e) => setEntry(e.target.value)}
-              rows={5} 
-              className="w-full rounded-xl border-slate-200 shadow-sm focus:border-sage-500 focus:ring-sage-500 text-sm p-3" 
-              placeholder="Take your time. There's no right or wrong way to write this."
-            />
-          </div>
-
-          {successMsg && (
-            <div className={`text-sm p-3 rounded-lg ${successMsg.includes('Failed') ? 'bg-red-50 text-red-700' : 'bg-sage-50 text-sage-700'}`}>
-              {successMsg}
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <button 
-              type="submit" 
-              disabled={isSubmitting || !entry.trim()}
-              className="btn-primary flex items-center gap-2 disabled:opacity-50"
-            >
-              {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {isSubmitting ? 'Saving...' : 'Save Entry'}
-            </button>
-          </div>
-        </form>
+    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+      <div className="mb-8">
+        <h1 className="page-title">Journal Integrations</h1>
+        <p className="page-sub">Connect your favorite note-taking apps to sync your thoughts and track your emotional patterns.</p>
       </div>
 
-      {/* Recent Entries History */}
-      <h2 className="text-lg font-semibold text-slate-900 mb-4">Recent Entries</h2>
-      
-      {loadingHistory ? (
-        <div className="flex items-center justify-center py-8 text-slate-400">
-          <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading history...
+      <div className="space-y-8">
+        {/* Available Connectors */}
+        <div>
+          <h2 className="text-lg font-semibold text-cream mb-4">Available Integrations</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.entries(availableConnectors).map(([key, connector]) => {
+              const isConnected = connectedSources.some(s => s.source_type === key);
+              
+              return (
+                <div key={key} className="card">
+                  <div className="flex items-start gap-4">
+                    <div className="text-4xl">{connector.icon}</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-semibold text-cream">{connector.name}</h3>
+                        {isConnected && (
+                          <CheckCircle className="h-4 w-4 text-green" />
+                        )}
+                      </div>
+                      <p className="text-xs text-cream3 mb-3">
+                        {connector.oauth_required ? 'OAuth authentication required' : 'Local connection'}
+                      </p>
+                      
+                      {isConnected ? (
+                        <div className="flex items-center gap-2 text-xs text-green">
+                          <CheckCircle className="h-3 w-3" />
+                          Connected
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => connectSource(key)}
+                          disabled={connecting === key}
+                          className="btn-primary text-sm py-2 px-4 flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {connecting === key ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Connecting...
+                            </>
+                          ) : (
+                            <>
+                              <ExternalLink className="h-4 w-4" />
+                              Connect
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      ) : history.length === 0 ? (
-        <div className="card flex flex-col items-center justify-center py-12 text-slate-400">
-          <BookOpen className="h-10 w-10 opacity-50 mb-3" />
-          <p className="text-sm">No journal entries yet. Write your first one above!</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {history.map(entry => (
-            <div key={entry.id} className="card flex gap-4">
-              <div className="flex-shrink-0 flex flex-col items-center justify-center w-12 h-12 rounded-full bg-sage-100 text-sage-700 font-bold text-sm">
-                {entry.mood_score}/5
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">{formatDate(entry.created_at)}</p>
-                <p className="text-sm text-slate-800">{entry.note}</p>
-              </div>
+
+        {/* Connected Sources */}
+        {connectedSources.length > 0 && (
+          <div>
+            <h2 className="text-lg font-semibold text-cream mb-4">Connected Sources</h2>
+            <div className="space-y-3">
+              {connectedSources.map(source => (
+                <div key={source.id} className="card">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-sm font-semibold text-cream">{source.source_name}</h3>
+                        <CheckCircle className="h-4 w-4 text-green" />
+                      </div>
+                      {source.last_sync && (
+                        <p className="text-xs text-cream3">
+                          Last synced: {formatDate(source.last_sync)}
+                        </p>
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => syncSource(source.id)}
+                      disabled={syncing === source.id}
+                      className="btn-secondary text-xs py-1.5 px-3 flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      {syncing === source.id ? (
+                        <>
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Syncing...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-3 w-3" />
+                          Sync Now
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
+
+        {/* Imported Notes */}
+        <div>
+          <h2 className="text-lg font-semibold text-cream mb-4">
+            Imported Notes ({importedNotes.length})
+          </h2>
+          
+          {importedNotes.length === 0 ? (
+            <div className="card text-center py-12">
+              <BookOpen className="h-10 w-10 text-cream3 opacity-50 mx-auto mb-3" />
+              <p className="text-cream3 text-sm">No imported notes yet. Connect and sync a source to get started!</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {importedNotes.map(note => (
+                <div key={note.id} className="card">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-amber bg-[rgba(232,168,76,0.10)] px-2 py-0.5 rounded">
+                          {note.source}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded ${getSentimentColor(note.sentiment)} bg-[rgba(255,255,255,0.05)]`}>
+                          {note.sentiment}
+                        </span>
+                        <span className="text-xs text-cream3">{formatDate(note.created_at)}</span>
+                      </div>
+                      {note.title && (
+                        <h3 className="text-sm font-semibold text-cream mb-1">{note.title}</h3>
+                      )}
+                      <p className="text-sm text-cream2">{note.content}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Privacy Notice */}
+        <div className="disclaimer">
+          <p className="text-sm text-cream3">
+            <strong className="text-amber">Privacy Notice:</strong> We only access the notes you explicitly share with MindfulAI. 
+            All sentiment analysis happens locally on your device. You can disconnect and delete synced data at any time.
+          </p>
+        </div>
+      </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="card max-w-md w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-cream">
+                Connect {availableConnectors[showAuthModal]?.name}
+              </h3>
+              <button 
+                onClick={() => setShowAuthModal(null)}
+                className="text-cream3 hover:text-cream"
+              >
+                <XCircle className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <p className="text-sm text-cream2 mb-4">
+              Enter your authentication code or token to connect to {availableConnectors[showAuthModal]?.name}.
+            </p>
+            
+            <input
+              type="text"
+              value={authCode}
+              onChange={(e) => setAuthCode(e.target.value)}
+              placeholder="Auth code or token"
+              className="w-full mb-4"
+            />
+            
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleConnect(showAuthModal)}
+                className="btn-primary flex-1"
+              >
+                Connect
+              </button>
+              <button 
+                onClick={() => setShowAuthModal(null)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

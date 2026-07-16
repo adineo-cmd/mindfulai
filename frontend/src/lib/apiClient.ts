@@ -9,11 +9,10 @@ const getAuthHeaders = () => {
 export async function apiRequest<T>(
   endpoint: string, 
   options: RequestInit = {},
-  isJsonResponse: boolean = true // Flag to handle file downloads (PDF/CSV)
+  isJsonResponse: boolean = true
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
   
-  // Inject the JWT token automatically for protected routes
   const headers = {
     ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...getAuthHeaders(), 
@@ -23,18 +22,16 @@ export async function apiRequest<T>(
   const response = await fetch(url, { ...options, headers });
   
   if (!response.ok) {
-    // Try to parse the specific error detail from FastAPI
     let errorMessage = `API Error: ${response.status} ${response.statusText}`;
     try {
       const errorData = await response.json();
       if (errorData.detail) errorMessage = errorData.detail;
     } catch (e) {
-      // Ignore parse error if response isn't JSON
+      // Ignore parse error
     }
     throw new Error(errorMessage);
   }
   
-  // If it's a file download, return the Blob, NOT JSON
   if (!isJsonResponse) {
     return response.blob() as unknown as T;
   }
@@ -44,7 +41,7 @@ export async function apiRequest<T>(
 
 export const api = {
   // ==========================================
-  // AUTH (Login / Register)
+  // AUTH
   // ==========================================
   register: (email: string, password: string) => 
     apiRequest(`/api/auth/register`, { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -53,13 +50,13 @@ export const api = {
     apiRequest(`/api/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) }),
 
   // ==========================================
-  // CHAT (AI Companion)
+  // CHAT
   // ==========================================
   sendChatMessage: (message: string) => 
     apiRequest(`/api/chat`, { method: 'POST', body: JSON.stringify({ message }) }),
 
   // ==========================================
-  // JOURNAL (Mood Logs)
+  // JOURNAL
   // ==========================================
   submitJournal: (data: any) => 
     apiRequest(`/api/journal`, { method: 'POST', body: JSON.stringify(data) }),
@@ -68,19 +65,17 @@ export const api = {
     apiRequest(`/api/journal`),
 
   // ==========================================
-  // ANALYTICS (Charts & Insights)
+  // ANALYTICS
   // ==========================================
-  // FIX: Changed paths from /api/analytics/... to /api/mood/... to match your backend!
   getMoodTrends: (days: number) => 
     apiRequest(`/api/mood/trends?days=${days}`),
   
-  getEmotionDistribution: () => 
-    apiRequest(`/api/mood/emotions`),
+  getEmotionDistribution: (source: 'all' | 'text' | 'facial' = 'all') =>
+    apiRequest(`/api/mood/emotions?source=${source}`),
   
   getHeatmapData: () => 
     apiRequest(`/api/mood/heatmap`), 
   
-  // FIX: Backend uses /risk-score, not /risk
   getRiskScore: (days: number) => 
     apiRequest(`/api/mood/risk-score?days=${days}`), 
   
@@ -88,7 +83,7 @@ export const api = {
     apiRequest(`/api/mood/correlation`),
 
   // ==========================================
-  // PRIVACY & CONSENT
+  // PRIVACY
   // ==========================================
   getConsent: () => 
     apiRequest(`/api/privacy/consent`),
@@ -100,10 +95,8 @@ export const api = {
     apiRequest(`/api/privacy/data`, { method: 'DELETE' }),
 
   // ==========================================
-  // EXPORTS (PDF / CSV)
+  // EXPORTS
   // ==========================================
-  // FIX: Backend has separate endpoints for PDF and CSV. 
-  // We pass `false` at the end so it returns a Blob instead of trying to parse JSON.
   exportPDF: (days: number = 30) => 
     apiRequest(`/api/mood/export/pdf?days=${days}`, {}, false),
   
@@ -111,26 +104,45 @@ export const api = {
     apiRequest(`/api/mood/export/csv`, {}, false),
 
   // ==========================================
-  // CONNECTORS (Notion, Google Keep, etc.)
+  // CONNECTORS (Updated!)
   // ==========================================
   getAvailableConnectors: () => 
     apiRequest(`/api/connectors/available`),
   
-  connectSource: (source_type: string, auth_code?: string) => 
-    apiRequest(`/api/connectors/connect`, { method: 'POST', body: JSON.stringify({ source_type, auth_code }) }),
+  // ✅ ADDED: Get connected sources
+  getConnectedSources: () => 
+    apiRequest(`/api/connectors/sources`),
   
-  syncSource: (source_id: number) => 
-    apiRequest(`/api/connectors/sync`, { method: 'POST', body: JSON.stringify({ source_id }) }),
+  connectSource: (data: { source_type: string; auth_code?: string }) => 
+    apiRequest(`/api/connectors/connect`, { 
+      method: 'POST', 
+      body: JSON.stringify(data) 
+    }),
+  
+  syncSource: (data: { source_id: number }) => 
+    apiRequest(`/api/connectors/sync`, { 
+      method: 'POST', 
+      body: JSON.stringify(data) 
+    }),
   
   getImportedNotes: () => 
     apiRequest(`/api/connectors/notes`),
 
   // ==========================================
-  // EMOTION ANALYSIS (REST endpoints)
+  // EMOTION ANALYSIS
   // ==========================================
   analyzeText: (text: string) => 
     apiRequest(`/api/text-emotion/analyze`, { method: 'POST', body: JSON.stringify({ text }) }),
   
   analyzeFace: (image_base64: string) => 
     apiRequest(`/api/facial-emotion/analyze`, { method: 'POST', body: JSON.stringify({ image_base64 }) }),
+
+// ==========================================
+  // 🆕 PI CAMERA (External IoT Camera)
+  // ==========================================
+  getLatestPiEmotion: () => 
+    apiRequest(`/api/pi-camera/latest`),
+  
+  getPiCameraStatus: () => 
+    apiRequest(`/api/pi-camera/status`),
 };

@@ -1,12 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Journal from '../components/journal/Journal.tsx';
+import JournalIntegrations from '../components/journal/JournalIntegrations.tsx';
 ---
 
-<BaseLayout title="Mood Journal">
-  {/* 
-    FIX: We use client:load because the user needs to interact 
-    with the form and see immediate feedback. 
-  */}
-  <Journal client:load />
+<BaseLayout title="Journal Integrations">
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+    <div class="mb-8">
+      <h1 class="page-title">Journal Integrations</h1>
+      <p class="page-sub">Connect your favorite note-taking apps to sync your thoughts and track your emotional patterns.</p>
+    </div>
+    
+    <JournalIntegrations client:load />
+  </div>
 </BaseLayout>

@@ -3,37 +3,354 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
   body {
-    @apply bg-warm-50 text-slate-800 antialiased;
+    background-color: #1a1510;
+    color: #f5ead8;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Respect reduced motion preferences */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: #f5ead8;
+    font-weight: 400;
   }
-
-  /* Accessible focus states */
-  *:focus-visible {
-    @apply outline-none ring-2 ring-sage-500 ring-offset-2 ring-offset-warm-50;
-  }
+  
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 2rem; }
+  h3 { font-size: 1.5rem; }
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl bg-sage-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-sage-700 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 transition-colors hover:bg-warm-100 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2;
-  }
+  /* Cards */
   .card {
-    @apply rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100;
+    background-color: #241e17;
+    border: 1px solid rgba(255,200,120,0.10);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  
+  .card2 {
+    background-color: #2c251d;
+    border: 1px solid rgba(255,200,120,0.18);
+    border-radius: 12px;
+    padding: 1.25rem;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    background: linear-gradient(135deg, #3d6b3d, #2a4a2a);
+    border: 1px solid rgba(106,158,106,0.35);
+    color: #f0c070 !important;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    text-decoration: none;
+  }
+  
+  .btn-primary:hover {
+    filter: brightness(1.12);
+    transform: translateY(-1px);
+  }
+  
+  .btn-secondary {
+    background: none;
+    border: 1px solid rgba(255,200,120,0.18);
+    color: #d4c4a8;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.9rem;
+    padding: 0.65rem 1.4rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    border-color: #c4882a;
+    color: #f0c070;
+  }
+  
+  .btn-danger {
+    background: rgba(196,88,88,0.12);
+    border: 1px solid rgba(196,88,88,0.3);
+    color: #e08080;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .btn-danger:hover {
+    background: rgba(196,88,88,0.2);
+  }
+  
+  /* Typography */
+  .page-title {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #f5ead8 !important;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.25rem;
+  }
+  
+  .page-sub {
+    font-size: 0.875rem;
+    color: #d4c4a8 !important;
+    margin-bottom: 2rem;
+  }
+  
+  .section-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #d4c4a8 !important;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  
+  .disclaimer {
+    background: rgba(232,168,76,0.06);
+    border: 1px solid rgba(232,168,76,0.15);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.78rem;
+    color: #d4c4a8 !important;
+    line-height: 1.6;
+  }
+  
+  .disclaimer strong {
+    color: #e8a84c !important;
+  }
+  
+  .mood-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(232,168,76,0.10);
+    border: 1px solid rgba(232,168,76,0.18);
+    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: #e8a84c !important;
+    font-weight: 500;
+  }
+  
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255,200,120,0.10);
+  }
+  
+  .toggle-row:last-child {
+    border-bottom: none;
+  }
+  
+  .toggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    position: relative;
+    flex-shrink: 0;
+  }
+  
+  .toggle.on {
+    background: #3d6b3d;
+  }
+  
+  .toggle.off {
+    background: #2e2820;
+    border: 1px solid rgba(255,200,120,0.18);
+  }
+  
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f5ead8;
+    transition: left 0.3s;
+  }
+  
+  .toggle.on::after {
+    left: 23px;
+  }
+  
+  .toggle.off::after {
+    left: 3px;
+  }
+  
+  /* Form inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    background: #26201a;
+    border: 1px solid rgba(255,200,120,0.18);
+    border-radius: 8px;
+    color: #f5ead8 !important;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.9rem;
+    padding: 0.875rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  
+  input::placeholder,
+  textarea::placeholder {
+    color: #9c8a72;
+  }
+  
+  input:focus,
+  textarea:focus {
+    border-color: rgba(232,168,76,0.35);
+  }
+  
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #c4882a, #f0c070);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f0c070;
+    border: 2px solid #1a1510;
+    box-shadow: 0 0 6px rgba(232,168,76,0.4);
+  }
+  
+  /* Stat cards */
+  .stat-card {
+    background-color: #241e17;
+    border: 1px solid rgba(255,200,120,0.10);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #d4c4a8 !important;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .stat-value {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: #f5ead8 !important;
+    line-height: 1;
+  }
+  
+  .stat-sub {
+    font-size: 0.72rem;
+    color: #9c8a72 !important;
+    margin-top: 0.4rem;
+  }
+  
+  /* Chart fixes */
+  .recharts-text,
+  .recharts-label,
+  .recharts-layer text {
+    fill: #d4c4a8 !important;
+  }
+  
+  .recharts-cartesian-grid-line {
+    stroke: rgba(255,200,120,0.15) !important;
+  }
+  
+  .recharts-tooltip-wrapper {
+    background: #241e17 !important;
+    border: 1px solid rgba(255,200,120,0.10) !important;
+    border-radius: 8px !important;
+  }
+}
+
+@layer utilities {
+  .text-amber {
+    color: #e8a84c !important;
+  }
+  
+  .text-amber2 {
+    color: #f0c070 !important;
+  }
+  
+  .text-cream {
+    color: #f5ead8 !important;
+  }
+  
+  .text-cream2 {
+    color: #d4c4a8 !important;
+  }
+  
+  .text-cream3 {
+    color: #9c8a72 !important;
+  }
+  
+  .text-slate-900 {
+    color: #f5ead8 !important;
+  }
+  
+  .text-slate-600 {
+    color: #d4c4a8 !important;
+  }
+  
+  .bg-bg {
+    background-color: #1a1510;
+  }
+  
+  .bg-bg2 {
+    background-color: #201b14;
+  }
+  
+  .bg-bg3 {
+    background-color: #26201a;
+  }
+  
+  .bg-bg4 {
+    background-color: #2e2820;
+  }
+  
+  .bg-card {
+    background-color: #241e17;
+  }
+  
+  .bg-card2 {
+    background-color: #2c251d;
+  }
+  
+  .bg-white {
+    background-color: #1a1510 !important;
+  }
+  
+  .bg-warm-50 {
+    background-color: #1a1510 !important;
   }
 }

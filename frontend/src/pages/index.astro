@@ -3,36 +3,39 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Home">
-  <section class="relative isolate overflow-hidden bg-warm-50 py-24 sm:py-32">
+  <!-- Hero Section -->
+  <section class="relative isolate overflow-hidden bg-bg py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl text-center">
-        <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-          Gentle, AI-powered <span class="text-sage-600">wellness tracking</span>
+        <div class="mood-badge mb-6">✦ Gentle, private, non-judgmental</div>
+        <h1 class="text-4xl font-bold tracking-tight text-cream sm:text-6xl">
+          Gentle, AI-powered<br/><span class="text-amber">wellness tracking</span>
         </h1>
-        <p class="mt-6 text-lg leading-8 text-slate-600">
+        <p class="mt-6 text-lg leading-8 text-cream2">
           Understand your emotional patterns with privacy-first tools. 
-          Track your mood, journal your thoughts, and receive compassionate, 
+          Track your mood, chat with your AI companion, and receive compassionate, 
           non-judgmental support tailored to your needs.
         </p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <a href="/dashboard" class="btn-primary px-8 py-3 text-base">Get Started</a>
-          <a href="/journal" class="text-sm font-semibold leading-6 text-slate-900 hover:text-sage-600 transition-colors">Try the Journal <span aria-hidden="true">→</span></a>
+          <a href="/live-check" class="text-sm font-semibold leading-6 text-cream2 hover:text-amber transition-colors">Try Live Check <span aria-hidden="true">→</span></a>
         </div>
         
-        <div class="mt-8 rounded-xl bg-amber-50 border border-amber-200 p-4 text-left max-w-xl mx-auto">
-          <p class="text-sm text-amber-800">
-            <strong>Disclaimer:</strong> This tool supports wellness tracking and is not a substitute for professional diagnosis or treatment. If you are in crisis, please contact emergency services.
+        <div class="mt-8 disclaimer max-w-xl mx-auto">
+          <p class="text-sm text-cream3">
+            <strong class="text-amber">Disclaimer:</strong> This tool supports wellness tracking and is not a substitute for professional diagnosis or treatment. If you are in crisis, please contact emergency services.
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="py-24 bg-white">
+  <!-- How It Works Section -->
+  <section class="py-24 bg-bg2">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center mb-16">
-        <h2 class="text-base font-semibold leading-7 text-sage-600">How it works</h2>
-        <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Designed for your peace of mind</p>
+        <h2 class="text-base font-semibold leading-7 text-amber">How it works</h2>
+        <p class="mt-2 text-3xl font-bold tracking-tight text-cream sm:text-4xl">Designed for your peace of mind</p>
       </div>
       <div class="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         {[
@@ -41,10 +44,182 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           { title: 'Actionable Insights', desc: 'Visualize your emotional trends over time to identify triggers and celebrate periods of stability.' }
         ].map(feature => (
           <div class="card hover:shadow-md transition-shadow">
-            <h3 class="text-lg font-semibold text-slate-900">{feature.title}</h3>
-            <p class="mt-2 text-sm text-slate-600 leading-relaxed">{feature.desc}</p>
+            <h3 class="text-lg font-semibold text-cream">{feature.title}</h3>
+            <p class="mt-2 text-sm text-cream2 leading-relaxed">{feature.desc}</p>
           </div>
         ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Overview Section -->
+  <section class="py-24 bg-bg">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-2xl lg:text-center mb-16">
+        <h2 class="text-base font-semibold leading-7 text-amber">Explore our features</h2>
+        <p class="mt-2 text-3xl font-bold tracking-tight text-cream sm:text-4xl">Everything you need for your wellness journey</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Dashboard -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">📊</div>
+            <h3 class="text-lg font-semibold text-cream">Dashboard</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            Get a comprehensive overview of your wellness journey. Track your mood trends, view emotion distribution, and understand your risk indicators at a glance.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Real-time mood metrics</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> 7/30/90 day trends</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Emotion breakdown</li>
+          </ul>
+          <a href="/dashboard" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            View Dashboard →
+          </a>
+        </div>
+
+        <!-- Live Check -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">📹</div>
+            <h3 class="text-lg font-semibold text-cream">Live Check</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            Use AI-powered facial expression analysis to get an objective snapshot of your current emotional state. Your video is processed locally and never stored.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Real-time emotion detection</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Privacy-first processing</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> No data stored externally</li>
+          </ul>
+          <a href="/live-check" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            Try Live Check →
+          </a>
+        </div>
+
+        <!-- Companion -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">💬</div>
+            <h3 class="text-lg font-semibold text-cream">Companion</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            Chat with your AI companion in a safe, judgment-free space. Get compassionate support, coping strategies, and someone to listen whenever you need.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> 24/7 availability</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Crisis detection</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Evidence-based support</li>
+          </ul>
+          <a href="/chat" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            Start Chatting →
+          </a>
+        </div>
+
+        <!-- Journal -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">📖</div>
+            <h3 class="text-lg font-semibold text-cream">Journal</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            Express your thoughts and feelings through guided journaling. Track your mood alongside your entries to identify patterns and triggers over time.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Mood tracking</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Sentiment analysis</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Private & secure</li>
+          </ul>
+          <a href="/journal" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            Write Entry →
+          </a>
+        </div>
+
+        <!-- Trends -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">📈</div>
+            <h3 class="text-lg font-semibold text-cream">Trends</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            Dive deep into your long-term patterns with advanced analytics. See correlations between your self-reported mood and facial expressions over time.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Weekly mood heatmaps</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Correlation insights</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Export your data</li>
+          </ul>
+          <a href="/trends" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            View Trends →
+          </a>
+        </div>
+
+        <!-- Settings -->
+        <div class="card group hover:border-amber3 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">⚙️</div>
+            <h3 class="text-lg font-semibold text-cream">Settings</h3>
+          </div>
+          <p class="text-sm text-cream2 leading-relaxed mb-4">
+            You're in complete control. Manage your data, adjust privacy preferences, and export or delete your information anytime. Radical transparency.
+          </p>
+          <ul class="space-y-2 text-xs text-cream3">
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Local-only processing</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Data export/download</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Permanent deletion</li>
+          </ul>
+          <a href="/settings" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            Manage Settings →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy Section -->
+  <section class="py-24 bg-bg2">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <div class="mx-auto max-w-3xl text-center">
+        <h2 class="text-base font-semibold leading-7 text-amber">Privacy First</h2>
+        <p class="mt-2 text-3xl font-bold tracking-tight text-cream sm:text-4xl">Your data belongs to you</p>
+        <p class="mt-6 text-lg leading-8 text-cream2">
+          We believe in radical transparency. All sensitive processing happens locally on your device. 
+          You can export or permanently delete your data at any time. No hidden tracking, no external servers.
+        </p>
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="card">
+            <div class="text-3xl mb-3">🔒</div>
+            <h3 class="text-sm font-semibold text-cream mb-2">Local Processing</h3>
+            <p class="text-xs text-cream2">Camera and text analysis happens on your device</p>
+          </div>
+          <div class="card">
+            <div class="text-3xl mb-3">📤</div>
+            <h3 class="text-sm font-semibold text-cream mb-2">Data Export</h3>
+            <p class="text-xs text-cream2">Download all your data anytime in multiple formats</p>
+          </div>
+          <div class="card">
+            <div class="text-3xl mb-3">🗑️</div>
+            <h3 class="text-sm font-semibold text-cream mb-2">Permanent Deletion</h3>
+            <p class="text-xs text-cream2">Delete everything with one click, no questions asked</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-24 bg-bg">
+    <div class="mx-auto max-w-4xl px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-cream sm:text-4xl">
+        Ready to start your wellness journey?
+      </h2>
+      <p class="mt-6 text-lg leading-8 text-cream2">
+        Join thousands who are taking control of their mental health with compassionate, privacy-first tools.
+      </p>
+      <div class="mt-10 flex items-center justify-center gap-x-6">
+        <a href="/dashboard" class="btn-primary px-8 py-3 text-base">Get Started Free</a>
       </div>
     </div>
   </section>

@@ -13,7 +13,8 @@ from app.api.routes import (
     connectors,
     text_emotion,
     facial_emotion,
-    pi_camera
+    pi_camera,
+    face_enroll
 )
 from app.websocket import facial_stream, pi_camera as pi_camera_ws
 
@@ -46,6 +47,7 @@ app.include_router(facial_emotion.router)
 app.include_router(facial_stream.router)
 app.include_router(pi_camera.router)
 app.include_router(pi_camera_ws.router)
+app.include_router(face_enroll.router)
 
 @app.get("/health")
 def health_check():

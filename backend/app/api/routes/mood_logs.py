@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.mood_log import MoodLog
@@ -8,10 +8,12 @@ from typing import List
 router = APIRouter(prefix="/api/journal", tags=["journal"])
 
 @router.post("", response_model=MoodLogResponse)
-async def create_log(log: MoodLogCreate, db: Session = Depends(get_db)):
+async def create_log(
+    log: MoodLogCreate, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Create a new mood/journal entry"""
-    user_id = 1  # Replace with actual user
-    
     try:
         db_log = MoodLog(
             user_id=user_id,
@@ -31,9 +33,11 @@ async def create_log(log: MoodLogCreate, db: Session = Depends(get_db)):
 
 # FIX: Changed "/" to "" to prevent 307 redirects
 @router.get("", response_model=List[MoodLogResponse])
-async def get_logs(db: Session = Depends(get_db)):
+async def get_logs(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Get all journal entries for current user"""
-    user_id = 1
     logs = db.query(MoodLog).filter(
         MoodLog.user_id == user_id
     ).order_by(MoodLog.created_at.desc()).all()

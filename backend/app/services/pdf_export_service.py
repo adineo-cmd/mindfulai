@@ -2,20 +2,25 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.colors import HexColor, black
+from reportlab.lib.colors import HexColor, black, red
 from reportlab.lib.enums import TA_CENTER
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from io import BytesIO
+import logging
 
-# Import your models to query real data
+# Import ALL your models
 from app.models.mood_log import MoodLog
 from app.models.text_emotion_record import TextEmotionRecord
+from app.models.facial_emotion_record import FacialEmotionRecord
+
+logger = logging.getLogger(__name__)
 
 class PDFExportService:
-    def generate_wellness_report(self, db: Session, user_id: int, days: int = 30) -> bytes:
+    def generate_wellness_report(self, db: Session, user_id: int, days: int = 7) -> bytes:
         """Generate a professional PDF wellness report with REAL database data"""
+        
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
         
@@ -38,25 +43,65 @@ class PDFExportService:
         story.append(Paragraph(f"Generated: {datetime.now().strftime('%B %d, %Y')}", styles['Normal']))
         story.append(Spacer(1, 0.3*inch))
         
-        # --- Fetch REAL Data from Database ---
+        # --- Fetch REAL Data from ALL Sources ---
         cutoff_date = datetime.now() - timedelta(days=days)
         
-        avg_mood = db.query(func.avg(MoodLog.mood_score)).filter(
+        # 1. Query MoodLog (journal entries)
+        mood_logs_count = db.query(func.count(MoodLog.id)).filter(
             MoodLog.user_id == user_id, MoodLog.created_at >= cutoff_date
         ).scalar() or 0
         
-        total_checkins = db.query(func.count(MoodLog.id)).filter(
+        mood_logs_avg = db.query(func.avg(MoodLog.mood_score)).filter(
             MoodLog.user_id == user_id, MoodLog.created_at >= cutoff_date
+        ).scalar()
+        
+        # 2. Query FacialEmotionRecord (camera detections)
+        facial_count = db.query(func.count(FacialEmotionRecord.id)).filter(
+            FacialEmotionRecord.user_id == user_id, FacialEmotionRecord.created_at >= cutoff_date
         ).scalar() or 0
         
-        most_common = db.query(TextEmotionRecord.emotion_label, func.count(TextEmotionRecord.id)).filter(
+        facial_avg = db.query(func.avg(FacialEmotionRecord.confidence)).filter(
+            FacialEmotionRecord.user_id == user_id, FacialEmotionRecord.created_at >= cutoff_date
+        ).scalar()
+        
+        # 3. Query TextEmotionRecord (text analysis)
+        text_count = db.query(func.count(TextEmotionRecord.id)).filter(
+            TextEmotionRecord.user_id == user_id, TextEmotionRecord.created_at >= cutoff_date
+        ).scalar() or 0
+        
+        # 4. Calculate TOTAL check-ins from ALL sources
+        total_checkins = mood_logs_count + facial_count + text_count
+        
+        # 5. Calculate Average Mood (prioritize journal entries, fallback to facial)
+        avg_mood = 0
+        if mood_logs_avg:
+            avg_mood = mood_logs_avg
+        elif facial_avg:
+            # Convert confidence (0-1) to mood scale (1-5)
+            avg_mood = 1 + (facial_avg * 4)
+        
+        # 6. Get Most Common Emotion from BOTH sources
+        text_emotion = db.query(TextEmotionRecord.emotion_label, func.count(TextEmotionRecord.id)).filter(
             TextEmotionRecord.user_id == user_id, TextEmotionRecord.created_at >= cutoff_date
         ).group_by(TextEmotionRecord.emotion_label).order_by(func.count(TextEmotionRecord.id).desc()).first()
+        
+        facial_emotion = db.query(FacialEmotionRecord.emotion_label, func.count(FacialEmotionRecord.id)).filter(
+            FacialEmotionRecord.user_id == user_id, FacialEmotionRecord.created_at >= cutoff_date
+        ).group_by(FacialEmotionRecord.emotion_label).order_by(func.count(FacialEmotionRecord.id).desc()).first()
+        
+        # Use the emotion with more occurrences
+        emotion_label = "N/A"
+        if text_emotion and facial_emotion:
+            emotion_label = text_emotion[0].capitalize() if text_emotion[1] >= facial_emotion[1] else facial_emotion[0].capitalize()
+        elif text_emotion:
+            emotion_label = text_emotion[0].capitalize()
+        elif facial_emotion:
+            emotion_label = facial_emotion[0].capitalize()
 
         summary_data = [
             ['Average Mood', f"{avg_mood:.1f} / 5"],
             ['Total Check-ins', str(total_checkins)],
-            ['Most Common Emotion', most_common[0].capitalize() if most_common else "N/A"],
+            ['Most Common Emotion', emotion_label],
             ['Report Period', f"Last {days} Days"]
         ]
         
@@ -76,13 +121,44 @@ class PDFExportService:
         story.append(summary_table)
         story.append(Spacer(1, 0.5*inch))
         
+        # --- Data Breakdown Section ---
+        story.append(Paragraph("Data Sources", heading_style))
+        breakdown_data = [
+            ['Journal Entries', str(mood_logs_count)],
+            ['Camera Detections', str(facial_count)],
+            ['Text Analysis', str(text_count)]
+        ]
+        breakdown_table = Table(breakdown_data, colWidths=[3*inch, 2*inch])
+        breakdown_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#F9FAFB')),
+            ('TEXTCOLOR', (0, 0), (-1, -1), black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#E5E7EB'))
+        ]))
+        story.append(breakdown_table)
+        story.append(Spacer(1, 0.5*inch))
+        
         # --- Recommendations ---
         story.append(Paragraph("Personalized Recommendations", heading_style))
-        recommendations = [
-            "• Continue your daily journaling practice - it's helping you track patterns.",
-            "• Consider adding 10 minutes of meditation to your morning routine.",
-            "• Try to maintain your current sleep schedule (7-8 hours)."
-        ]
+        if total_checkins == 0:
+            story.append(Paragraph("Start your wellness journey by:", styles['Normal']))
+            story.append(Spacer(1, 0.1*inch))
+            recommendations = [
+                "• Writing your first journal entry",
+                "• Using the Live Check camera feature",
+                "• Analyzing your text emotions"
+            ]
+        else:
+            recommendations = [
+                "• Continue your daily journaling practice - it's helping you track patterns.",
+                "• Consider adding 10 minutes of meditation to your morning routine.",
+                "• Try to maintain your current sleep schedule (7-8 hours)."
+            ]
+        
         for rec in recommendations:
             story.append(Paragraph(rec, styles['Normal']))
             story.append(Spacer(1, 0.1*inch))

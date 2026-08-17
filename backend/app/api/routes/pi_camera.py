@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.db.session import get_db
@@ -7,12 +7,16 @@ from app.models.facial_emotion_record import FacialEmotionRecord
 router = APIRouter(prefix="/api/pi-camera", tags=["pi-camera"])
 
 @router.get("/latest")
-def get_latest_pi_emotion(db: Session = Depends(get_db)):
+def get_latest_pi_emotion(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Get the most recent emotion detected by the Raspberry Pi"""
     # Fetch the latest record from the last 5 minutes
     time_threshold = datetime.utcnow() - timedelta(minutes=5)
     
     latest_record = db.query(FacialEmotionRecord).filter(
+        FacialEmotionRecord.user_id == user_id,  # Filter by specific user
         FacialEmotionRecord.created_at >= time_threshold
     ).order_by(
         FacialEmotionRecord.created_at.desc()
@@ -40,12 +44,16 @@ def get_latest_pi_emotion(db: Session = Depends(get_db)):
     }
 
 @router.get("/status")
-def get_pi_camera_status(db: Session = Depends(get_db)):
+def get_pi_camera_status(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Check if the Raspberry Pi camera is actively streaming"""
     # Check if there's been activity in the last 2 minutes
     time_threshold = datetime.utcnow() - timedelta(minutes=2)
     
     recent_activity = db.query(FacialEmotionRecord).filter(
+        FacialEmotionRecord.user_id == user_id,  # Filter by specific user
         FacialEmotionRecord.created_at >= time_threshold
     ).count()
     

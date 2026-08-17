@@ -1,9 +1,8 @@
 const API_BASE = import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-// Helper to get the JWT token from localStorage
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('access_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
+// Helper to get the currently selected user ID from localStorage
+const getUserId = () => {
+  return localStorage.getItem('current_user_id') || '1'; // Default to 1 if not set
 };
 
 export async function apiRequest<T>(
@@ -11,11 +10,15 @@ export async function apiRequest<T>(
   options: RequestInit = {},
   isJsonResponse: boolean = true
 ): Promise<T> {
-  const url = `${API_BASE}${endpoint}`;
+  let url = `${API_BASE}${endpoint}`;
+  
+  // ✅ CRITICAL FIX: Append user_id to the URL for ALL requests (GET, POST, PUT, DELETE)
+  // This matches the `user_id: int = Query(default=1)` in your FastAPI backend.
+  const separator = url.includes('?') ? '&' : '?';
+  url += `${separator}user_id=${getUserId()}`;
   
   const headers = {
     ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-    ...getAuthHeaders(), 
     ...options.headers,
   };
 
@@ -31,7 +34,7 @@ export async function apiRequest<T>(
     }
     throw new Error(errorMessage);
   }
-  
+ 
   if (!isJsonResponse) {
     return response.blob() as unknown as T;
   }
@@ -41,19 +44,13 @@ export async function apiRequest<T>(
 
 export const api = {
   // ==========================================
-  // AUTH
+  // AUTH (Optional for this simple demo)
   // ==========================================
   register: (email: string, password: string) => 
     apiRequest(`/api/auth/register`, { method: 'POST', body: JSON.stringify({ email, password }) }),
   
   login: (email: string, password: string) => 
     apiRequest(`/api/auth/login`, { method: 'POST', body: JSON.stringify({ email, password }) }),
-
-  // ==========================================
-  // CHAT
-  // ==========================================
-  sendChatMessage: (message: string) => 
-    apiRequest(`/api/chat`, { method: 'POST', body: JSON.stringify({ message }) }),
 
   // ==========================================
   // JOURNAL
@@ -97,19 +94,18 @@ export const api = {
   // ==========================================
   // EXPORTS
   // ==========================================
-  exportPDF: (days: number = 30) => 
+  exportPDF: (days: number = 7) => 
     apiRequest(`/api/mood/export/pdf?days=${days}`, {}, false),
   
   exportCSV: () => 
     apiRequest(`/api/mood/export/csv`, {}, false),
 
   // ==========================================
-  // CONNECTORS (Updated!)
+  // CONNECTORS
   // ==========================================
   getAvailableConnectors: () => 
     apiRequest(`/api/connectors/available`),
   
-  // ✅ ADDED: Get connected sources
   getConnectedSources: () => 
     apiRequest(`/api/connectors/sources`),
   
@@ -137,7 +133,7 @@ export const api = {
   analyzeFace: (image_base64: string) => 
     apiRequest(`/api/facial-emotion/analyze`, { method: 'POST', body: JSON.stringify({ image_base64 }) }),
 
-// ==========================================
+  // ==========================================
   // 🆕 PI CAMERA (External IoT Camera)
   // ==========================================
   getLatestPiEmotion: () => 

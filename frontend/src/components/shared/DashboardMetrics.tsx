@@ -18,7 +18,7 @@ export default function DashboardMetrics() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        // Fetch real data from the backend in parallel
+        // ✅ Fetch real data from the backend in parallel (automatically includes ?user_id=X)
         const [trendsRes, riskRes] = await Promise.all([
           api.getMoodTrends(7).catch(() => ({ data: [] })),
           api.getRiskScore(7).catch(() => ({ data: [] }))
@@ -37,7 +37,7 @@ export default function DashboardMetrics() {
         const riskLabel = latestRisk > 60 ? 'High' : latestRisk > 30 ? 'Medium' : 'Low';
         const riskTrend = latestRisk > 60 ? 'down' : 'up';
 
-        // 3. Calculate Streak (FIXED: Count unique days in last 7 days)
+        // 3. Calculate Streak (Count unique days in last 7 days)
         const now = new Date();
         const sevenDaysAgo = new Date(now);
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -72,16 +72,20 @@ export default function DashboardMetrics() {
     <>
       {metrics.map((m, i) => (
         <div key={i} className="card flex flex-col gap-2">
-          <dt className="text-sm font-medium text-slate-500">{m.title}</dt>
+          {/* ✅ FIX: Updated to dark theme colors (text-cream2 instead of text-slate-500) */}
+          <dt className="text-sm font-medium text-cream2">{m.title}</dt>
           <dd className="flex items-baseline gap-2">
-            <span className="text-3xl font-semibold text-slate-900">{m.value}</span>
+            {/* ✅ FIX: Updated to dark theme colors (text-cream instead of text-slate-900) */}
+            <span className="text-3xl font-semibold text-cream">{m.value}</span>
             {m.trend !== 'neutral' && (
-              <span className={`text-sm font-medium ${m.trend === 'up' ? 'text-sage-600' : 'text-plum-600'}`}>
+              <span className={`text-sm font-medium ${
+                m.trend === 'up' ? 'text-green' : 'text-[#e08080]'
+              }`}>
                 {m.trend === 'up' ? '↑' : '↓'}
               </span>
             )}
           </dd>
-          <dd className="text-xs text-slate-500">{m.subtitle}</dd>
+          <dd className="text-xs text-cream3">{m.subtitle}</dd>
         </div>
       ))}
     </>

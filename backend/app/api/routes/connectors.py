@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.connector import ConnectorConnectRequest, ConnectorSyncRequest
@@ -13,10 +13,11 @@ def get_available_connectors():
     return {"connectors": connector_service.get_available_connectors()}
 
 @router.get("/sources")
-def get_connected_sources(db: Session = Depends(get_db)):
+def get_connected_sources(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Get all connected sources for current user"""
-    user_id = 1  # Replace with actual user from JWT
-    
     sources = db.query(ExternalSource).filter(
         ExternalSource.user_id == user_id,
         ExternalSource.is_connected == True
@@ -36,23 +37,31 @@ def get_connected_sources(db: Session = Depends(get_db)):
     }
 
 @router.post("/connect")
-def connect_source(request: ConnectorConnectRequest, db: Session = Depends(get_db)):
+def connect_source(
+    request: ConnectorConnectRequest, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Connect to an external data source"""
-    user_id = 1  # Replace with actual user
     result = connector_service.connect_source(
         db, user_id, request.source_type, request.auth_code
     )
     return result
 
 @router.post("/sync")
-def sync_source(request: ConnectorSyncRequest, db: Session = Depends(get_db)):
+def sync_source(
+    request: ConnectorSyncRequest, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Sync data from connected source"""
-    user_id = 1  # Replace with actual user
     result = connector_service.sync_notes(db, user_id, request.source_id)
     return result
 
 @router.get("/notes")
-def get_imported_notes(db: Session = Depends(get_db)):
+def get_imported_notes(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Get all imported notes"""
-    user_id = 1  # Replace with actual user
     return {"notes": connector_service.get_imported_notes(db, user_id)}

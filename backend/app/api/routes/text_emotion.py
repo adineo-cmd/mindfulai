@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -9,13 +9,15 @@ from app.services.text_emotion_service import text_emotion_service
 router = APIRouter(prefix="/api/text-emotion", tags=["text-emotion"])
 
 @router.post("/analyze", response_model=TextAnalyzeResponse)
-def analyze_text(request: TextAnalyzeRequest, db: Session = Depends(get_db)):
+def analyze_text(
+    request: TextAnalyzeRequest, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """
     Analyzes a text snippet for emotion and sentiment.
     Stores the derived metrics in the database for analytics.
     """
-    user_id = 1  # Mock user ID for template
-
     if not request.text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
 

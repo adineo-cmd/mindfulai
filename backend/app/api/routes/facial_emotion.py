@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -12,13 +12,16 @@ from app.core.exceptions import ConsentRequiredException
 router = APIRouter(prefix="/api/facial-emotion", tags=["facial-emotion"])
 
 @router.post("/analyze", response_model=FacialAnalyzeResponse)
-def analyze_facial_emotion(request: FacialAnalyzeRequest, db: Session = Depends(get_db)):
+def analyze_facial_emotion(
+    request: FacialAnalyzeRequest, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """
     Analyzes a single base64 image for facial emotion.
     STRICT PRIVACY: The raw image is processed in-memory and NEVER saved to the database.
     """
     # user = get_current_user()
-    user_id = 1  # Mock user ID for template
 
     # 1. STRICT PRIVACY CHECK: Verify explicit user consent for camera processing
     consent = db.query(ConsentRecord).filter(ConsentRecord.user_id == user_id).first()

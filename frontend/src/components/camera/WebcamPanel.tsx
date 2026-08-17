@@ -5,7 +5,7 @@ export default function WebcamPanel() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const frameIntervalRef = useRef<number | null>(null);
+  const frameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [isActive, setIsActive] = useState(false);
   const [emotion, setEmotion] = useState<string>('Neutral');
@@ -33,11 +33,13 @@ export default function WebcamPanel() {
   };
 
   const connectWebSocket = () => {
-    // 🔧 FIX: Dynamically construct WebSocket URL based on current hostname
-    // This ensures it works when accessed from other devices on the network
+    // 🔧 FIX 1: Get the currently selected user ID
+    const userId = localStorage.getItem('current_user_id') || '1';
+    
+    // 🔧 FIX 2: Dynamically construct WebSocket URL AND append user_id
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsHost = window.location.hostname;
-    const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/facial-emotion`;
+    const wsUrl = `${wsProtocol}//${wsHost}:8000/ws/facial-emotion?user_id=${userId}`;
     
     console.log(`🔌 Connecting to WebSocket: ${wsUrl}`);
     
@@ -131,14 +133,14 @@ export default function WebcamPanel() {
       </div>
 
       {/* Camera View */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900" style={{ minHeight: '400px' }}>  {/* Add minHeight */}
-  <video
-    ref={videoRef}
-    autoPlay
-    playsInline
-    muted
-    className={`h-full w-full object-cover ${!isActive ? 'opacity-50' : ''}`}
-  />
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-900" style={{ minHeight: '400px' }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          className={`h-full w-full object-cover ${!isActive ? 'opacity-50' : ''}`}
+        />
         {!isActive && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-cream3">
             <Video className="h-12 w-12 mb-2 opacity-50" />

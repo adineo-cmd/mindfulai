@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models import mood_log, text_emotion_record, facial_emotion_record, consent_record
@@ -9,10 +9,11 @@ router = APIRouter(prefix="/api/privacy", tags=["privacy"])
 
 # --- ADDED: Endpoint to GET current consent preferences ---
 @router.get("/consent")
-def get_consent(db: Session = Depends(get_db)):
+def get_consent(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Get current consent preferences for user."""
-    user_id = 1  # Replace with actual user ID
-    
     consent = db.query(consent_record.ConsentRecord).filter(
         consent_record.ConsentRecord.user_id == user_id
     ).first()
@@ -40,10 +41,12 @@ def get_consent(db: Session = Depends(get_db)):
 
 # --- UPDATE: Changed path from /consent to just use the router prefix ---
 @router.put("/consent")
-def update_consent(consent_data: ConsentUpdate, db: Session = Depends(get_db)):
+def update_consent(
+    consent_data: ConsentUpdate, 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Update user consent preferences for camera, text, and analytics."""
-    user_id = 1  # Replace with actual user ID
-    
     consent = db.query(consent_record.ConsentRecord).filter(
         consent_record.ConsentRecord.user_id == user_id
     ).first()
@@ -74,9 +77,12 @@ def update_consent(consent_data: ConsentUpdate, db: Session = Depends(get_db)):
     }
 
 @router.delete("/data")
-def delete_my_data(db: Session = Depends(get_db)):
+def delete_my_data(
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """GDPR-style right to erasure. Deletes all user data."""
-    user_id = 1  # Replace with actual user ID
+    # Note: Removed chat_message deletion since the chat feature was removed
     
     db.query(mood_log.MoodLog).filter(mood_log.MoodLog.user_id == user_id).delete()
     db.query(text_emotion_record.TextEmotionRecord).filter(
@@ -85,7 +91,6 @@ def delete_my_data(db: Session = Depends(get_db)):
     db.query(facial_emotion_record.FacialEmotionRecord).filter(
         facial_emotion_record.FacialEmotionRecord.user_id == user_id
     ).delete()
-    db.query(chat_message.ChatMessage).filter(chat_message.ChatMessage.user_id == user_id).delete()
     db.query(consent_record.ConsentRecord).filter(
         consent_record.ConsentRecord.user_id == user_id
     ).delete()
@@ -94,10 +99,12 @@ def delete_my_data(db: Session = Depends(get_db)):
     return {"status": "success", "message": "All personal data has been permanently deleted."}
 
 @router.get("/export")
-def export_data(format: str = "json", db: Session = Depends(get_db)):
+def export_data(
+    format: str = "json", 
+    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    db: Session = Depends(get_db)
+):
     """Export user data (simplified JSON export for demo)."""
-    user_id = 1  # Replace with actual user ID
-    
     logs = db.query(mood_log.MoodLog).filter(mood_log.MoodLog.user_id == user_id).all()
     records = [{"date": log.created_at, "mood": log.mood_score, "note": log.note} for log in logs]
     

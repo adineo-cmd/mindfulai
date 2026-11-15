@@ -2,14 +2,14 @@
 
 <br />
 
-# Mindfulai — Frontend
+# MindfulAI — Frontend
 
 **Astro · Tailwind CSS · React islands · TypeScript**
 
 <br />
 
 [![Astro](https://img.shields.io/badge/Astro-4.5-FF5D01?style=for-the-badge&logo=astro&logoColor=white)](https://astro.build)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-The Mindfulai frontend is a **multi-page static website** built with Astro. Each page is a real server-rendered HTML route — not a client-side SPA. JavaScript is added only where a section is genuinely interactive (charts, the live webcam panel, the chat window, mood sliders), using Astro's islands architecture with React components and `client:visible` / `client:load` directives.
+The MindfulAI frontend is a **multi-page static website** built with Astro. Each page is a real server-rendered HTML route — not a client-side SPA. JavaScript is added only where a section is genuinely interactive (charts, the live webcam panel, the journal composer, mood sliders), using Astro's islands architecture with React components and `client:visible` / `client:load` directives.
 
 The design is calm, clinical-but-warm: sage green and warm neutrals for most UI, muted plum for accents, IBM Plex Mono for data labels. It avoids the generic purple-gradient SaaS aesthetic common in AI demos.
 
@@ -32,10 +32,10 @@ The design is calm, clinical-but-warm: sage green and warm neutrals for most UI,
 | `/` | `index.astro` | Landing page — hero, how it works, features, privacy label |
 | `/dashboard` | `dashboard.astro` | Mood trend chart, emotion distribution, risk score, quick check-in |
 | `/live-check` | `live-check.astro` | Webcam stream → real-time facial emotion detection |
-| `/chat` | `chat.astro` | LLM companion chat with crisis escalation banner |
-| `/journal` | `journal.astro` | Free-text journal with emotion tagging and history |
+| `/pi-camera` | `pi-camera.astro` | Remote live-check from a Raspberry Pi camera stream |
+| `/journal` | `journal.astro` | Mood entries with emotion tagging, history, and note-source connectors |
 | `/trends` | `trends.astro` | Mood heatmap, facial/self-report correlation, PDF/CSV export |
-| `/settings` | `settings.astro` | Consent toggles, data export, data deletion |
+| `/settings` | `settings.astro` | Consent toggles, user switcher, privacy preferences |
 
 ---
 
@@ -53,7 +53,7 @@ frontend/
 │   │   ├── index.astro                # /
 │   │   ├── dashboard.astro            # /dashboard
 │   │   ├── live-check.astro           # /live-check
-│   │   ├── chat.astro                 # /chat
+│   │   ├── pi-camera.astro            # /pi-camera
 │   │   ├── journal.astro              # /journal
 │   │   ├── trends.astro               # /trends
 │   │   └── settings.astro             # /settings
@@ -69,18 +69,26 @@ frontend/
 │   │   ├── charts/                    # React islands — hydrated client-side
 │   │   │   ├── MoodTrendChart.tsx     # Line chart (Recharts) — 7/30/90d toggle
 │   │   │   ├── EmotionDistributionChart.tsx  # Donut chart
-│   │   │   └── MoodHeatmap.tsx        # Calendar heatmap grid
+│   │   │   ├── MoodHeatmap.tsx        # Calendar heatmap grid
+│   │   │   └── CorrelationInsights.tsx  # Facial vs. self-report correlation
 │   │   │
 │   │   ├── camera/
-│   │   │   └── WebcamPanel.tsx        # React island — webcam + WebSocket emotion stream
+│   │   │   ├── WebcamPanel.tsx        # React island — webcam + WebSocket emotion stream
+│   │   │   └── PiCameraPanel.tsx      # React island — Pi camera live view
 │   │   │
-│   │   ├── chat/
-│   │   │   ├── ChatWindow.tsx         # React island — message thread + send
-│   │   │   └── CrisisBanner.astro    # Static alert shown on crisis flag
+│   │   ├── journal/
+│   │   │   ├── Journal.tsx            # React island — entry composer + history
+│   │   │   └── JournalIntegrations.tsx  # Note-source connectors UI
+│   │   │
+│   │   ├── settings/
+│   │   │   └── SettingsManager.tsx    # React island — consent + privacy controls
 │   │   │
 │   │   └── shared/
-│   │       ├── ConsentToggle.astro    # Camera/voice consent switch
-│   │       └── MetricCard.astro      # Reusable stat card (value + label)
+│   │       ├── ConsentToggle.astro    # Camera/text consent switch
+│   │       ├── DashboardMetrics.tsx   # React island — dashboard metric row
+│   │       ├── ExportButtons.tsx      # PDF/CSV export triggers
+│   │       ├── MetricCard.astro       # Reusable stat card (value + label)
+│   │       └── UserSwitcher.tsx       # Demo helper — switch active user
 │   │
 │   ├── lib/
 │   │   └── apiClient.ts               # Typed fetch wrapper — all backend calls live here
@@ -92,6 +100,7 @@ frontend/
 │
 ├── astro.config.mjs                   # Astro integrations: react, tailwind
 ├── tailwind.config.mjs                # Design tokens — colors, fonts, radii
+├── .env.example                       # Template — copy to .env and set the backend URL
 ├── package.json
 └── README.md                          # ← You are here
 ```
@@ -125,19 +134,15 @@ Astro renders every page to static HTML at build time. Interactive components ar
 
 ```astro
 ---
-// dashboard.astro
 import MoodTrendChart from '../components/charts/MoodTrendChart.tsx';
 ---
-<!-- Static HTML -->
 <h1>Overview</h1>
-
-<!-- React island — only hydrates when scrolled into view -->
 <MoodTrendChart client:visible />
 ```
 
 | Directive | When the island hydrates | Used for |
 |---|---|---|
-| `client:load` | Immediately on page load | Chat window, webcam panel |
+| `client:load` | Immediately on page load | Webcam panel, Pi camera panel |
 | `client:visible` | When scrolled into view | Charts on dashboard and trends page |
 
 ---
@@ -147,7 +152,6 @@ import MoodTrendChart from '../components/charts/MoodTrendChart.tsx';
 All backend calls are centralised in `src/lib/apiClient.ts`. Import from here on every page — never call `fetch` directly from a component.
 
 ```typescript
-// src/lib/apiClient.ts
 const API_BASE = import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -160,15 +164,22 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
 }
 
 export const api = {
-  getMoodTrends:          (days: number)  => apiRequest(`/api/mood/trends?days=${days}`),
-  getEmotionDistribution: ()              => apiRequest(`/api/mood/emotions`),
-  logMood:                (payload: any)  => apiRequest('/api/mood/log', { method: 'POST', body: JSON.stringify(payload) }),
-  sendChatMessage:        (payload: any)  => apiRequest('/api/chat', { method: 'POST', body: JSON.stringify(payload) }),
-  saveJournalEntry:       (payload: any)  => apiRequest('/api/journal', { method: 'POST', body: JSON.stringify(payload) }),
+  register:               (email: string, password: string) => apiRequest('/api/auth/register', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  login:                  (email: string, password: string) => apiRequest('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  submitJournal:          (payload: any)  => apiRequest('/api/journal', { method: 'POST', body: JSON.stringify(payload) }),
   getJournalHistory:      ()              => apiRequest('/api/journal'),
-  getAnalytics:           ()              => apiRequest('/api/analytics/summary'),
-  exportData:             ()              => apiRequest('/api/user/data'),
-  deleteData:             ()              => apiRequest('/api/user/data', { method: 'DELETE' }),
+  getMoodTrends:          (days: number)  => apiRequest(`/api/mood/trends?days=${days}`),
+  getEmotionDistribution: (source: 'all' | 'text' | 'facial' = 'all') => apiRequest(`/api/mood/emotions?source=${source}`),
+  getHeatmapData:         ()              => apiRequest('/api/mood/heatmap'),
+  getRiskScore:           (days: number)  => apiRequest(`/api/mood/risk-score?days=${days}`),
+  getCorrelationData:     ()              => apiRequest('/api/mood/correlation'),
+  getAvailableConnectors: ()              => apiRequest('/api/connectors/available'),
+  connectSource:          (data: any)     => apiRequest('/api/connectors/connect', { method: 'POST', body: JSON.stringify(data) }),
+  syncSource:             (data: any)     => apiRequest('/api/connectors/sync', { method: 'POST', body: JSON.stringify(data) }),
+  analyzeText:            (text: string)  => apiRequest('/api/text-emotion/analyze', { method: 'POST', body: JSON.stringify({ text }) }),
+  analyzeFace:            (image_base64: string) => apiRequest('/api/facial-emotion/analyze', { method: 'POST', body: JSON.stringify({ image_base64 }) }),
+  getLatestPiEmotion:     ()              => apiRequest('/api/pi-camera/latest'),
+  getPiCameraStatus:      ()              => apiRequest('/api/pi-camera/status'),
 };
 ```
 
@@ -207,11 +218,7 @@ cp .env.example .env
 Open `.env` and set the backend URL:
 
 ```env
-# Local development (FastAPI running on port 8000)
 PUBLIC_API_BASE_URL=http://localhost:8000
-
-# Production (replace with your deployed backend URL)
-# PUBLIC_API_BASE_URL=https://api.your-domain.com
 ```
 
 ### 3 — Start the development server
@@ -258,12 +265,12 @@ Serves `dist/` at **http://localhost:4321** — identical to what would be serve
 ```json
 {
   "@astrojs/react": "^3.0.10",
-  "@astrojs/tailwind": "^5.1.0",
-  "astro": "^4.5.0",
+  "@astrojs/tailwind": "^6.0.2",
+  "astro": "^4.16.19",
   "react": "^18.2.0",
   "react-dom": "^18.2.0",
   "recharts": "^2.12.2",
-  "tailwindcss": "^3.4.1",
+  "tailwindcss": "^3.4.19",
   "lucide-react": "^0.344.0"
 }
 ```
@@ -275,7 +282,7 @@ Serves `dist/` at **http://localhost:4321** — identical to what would be serve
 - All interactive islands use semantic HTML and visible focus rings.
 - The recording indicator on the Live Check page uses `@media (prefers-reduced-motion: reduce)` to disable its pulse animation for users who have requested reduced motion.
 - Chart components include ARIA labels describing the data for screen readers.
-- The crisis banner in the chat page uses `role="alert"` so it is announced immediately by assistive technology.
+- The site-wide crisis disclaimer lives in the footer as plain text, so assistive technology reads it immediately.
 
 ---
 
@@ -294,10 +301,9 @@ Set `PUBLIC_API_BASE_URL` in the Vercel project environment variables dashboard.
 
 ```bash
 npm run build
-# Drag and drop dist/ into the Netlify dashboard
-# or connect the GitHub repo and set the build command to: npm run build
-# Set PUBLIC_API_BASE_URL in Site Settings → Environment Variables
 ```
+
+Connect the GitHub repo with build command `npm run build`, or drag `dist/` into the Netlify dashboard. Set `PUBLIC_API_BASE_URL` in Site Settings → Environment Variables.
 
 ### Static server (Nginx)
 
@@ -305,7 +311,7 @@ npm run build
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/tideline/dist;
+    root /var/www/mindfulai/dist;
     index index.html;
 
     location / {
@@ -338,5 +344,5 @@ Run `npm run build` once to purge and regenerate. In dev, HMR handles this autom
 ---
 
 <div align="center">
-  <sub>Part of the Mindfulai project · Frontend only — see <a href="../backend/README.md">backend/README.md</a> for the API</sub>
+  <sub>Part of the MindfulAI project · Frontend only — see <a href="../backend/README.md">backend/README.md</a> for the API</sub>
 </div>

@@ -13,8 +13,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </h1>
         <p class="mt-6 text-lg leading-8 text-cream2">
           Understand your emotional patterns with privacy-first tools. 
-          Track your mood, chat with your AI companion, and receive compassionate, 
-          non-judgmental support tailored to your needs.
+          Track your mood, journal your thoughts, and receive clear, 
+          honest insights tailored to your needs.
         </p>
         <div class="mt-10 flex items-center justify-center gap-x-6">
           <a href="/dashboard" class="btn-primary px-8 py-3 text-base">Get Started</a>
@@ -40,7 +40,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-3">
         {[
           { title: 'Private Tracking', desc: 'Your data stays yours. We process sensitive inputs locally whenever possible and encrypt everything else.' },
-          { title: 'Compassionate AI', desc: 'Our companion is trained to listen, validate, and offer evidence-based coping strategies, not to diagnose.' },
+          { title: 'Compassionate AI', desc: 'On-device models analyze facial expressions and journal text to reflect your emotional patterns back to you — never to diagnose.' },
           { title: 'Actionable Insights', desc: 'Visualize your emotional trends over time to identify triggers and celebrate periods of stability.' }
         ].map(feature => (
           <div class="card hover:shadow-md transition-shadow">
@@ -99,22 +99,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </a>
         </div>
 
-        <!-- Companion -->
+        <!-- Connectors -->
         <div class="card group hover:border-amber3 transition-all duration-300">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green2 to-green3 flex items-center justify-center text-amber2 text-xl">💬</div>
-            <h3 class="text-lg font-semibold text-cream">Companion</h3>
+            <h3 class="text-lg font-semibold text-cream">Connectors</h3>
           </div>
           <p class="text-sm text-cream2 leading-relaxed mb-4">
-            Chat with your AI companion in a safe, judgment-free space. Get compassionate support, coping strategies, and someone to listen whenever you need.
+            Bring context from the note sources you opt into. Connect an external source, sync it on your terms, and see its entries alongside your journal.
           </p>
           <ul class="space-y-2 text-xs text-cream3">
-            <li class="flex items-center gap-2"><span class="text-green">✓</span> 24/7 availability</li>
-            <li class="flex items-center gap-2"><span class="text-green">✓</span> Crisis detection</li>
-            <li class="flex items-center gap-2"><span class="text-green">✓</span> Evidence-based support</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Opt-in connections</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> On-demand sync</li>
+            <li class="flex items-center gap-2"><span class="text-green">✓</span> Imported notes timeline</li>
           </ul>
-          <a href="/chat" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
-            Start Chatting →
+          <a href="/journal" class="mt-4 inline-block text-sm text-amber hover:text-amber2 transition-colors">
+            Open Journal →
           </a>
         </div>
 

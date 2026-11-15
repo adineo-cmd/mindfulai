@@ -2,14 +2,15 @@
 
 <br />
 
-<img src="https://raw.githubusercontent.com/your-org/Mindfulai/main/frontend/public/favicon.svg" width="60" height="60" alt="Mindfulai logo" />
+<img src="https://raw.githubusercontent.com/adineo-cmd/mindfulai/main/frontend/public/favicon.svg" width="60" height="60" alt="MindfulAI logo" />
 
-# Mindfulai — AI Mental Wellness Platform
+# MindfulAI — AI Mental Wellness Platform
 
 **A privacy-first, multi-modal mental wellness website powered by transformer-based emotion AI.**
 
 <br />
 
+[![CI](https://github.com/adineo-cmd/mindfulai/actions/workflows/ci.yml/badge.svg)](https://github.com/adineo-cmd/mindfulai/actions/workflows/ci.yml)
 [![Astro](https://img.shields.io/badge/Frontend-Astro_4.5-FF5D01?style=for-the-badge&logo=astro&logoColor=white)](https://astro.build)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI_0.110-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
@@ -17,7 +18,7 @@
 
 <br />
 
-> ⚠️ **Disclaimer** — Mindfulai is a final-year academic project. It is a wellness tracking tool and is **not** a substitute for professional diagnosis, therapy, or clinical treatment. If you or someone you know is in crisis, please contact a qualified mental health professional.
+> ⚠️ **Disclaimer** — MindfulAI is a final-year academic project. It is a wellness tracking tool and is **not** a substitute for professional diagnosis, therapy, or clinical treatment. If you or someone you know is in crisis, please contact a qualified mental health professional.
 
 <br />
 
@@ -25,24 +26,26 @@
 
 ---
 
-## What is Mindfulai?
+## What is MindfulAI?
 
-Mindfulai reads the emotional tide of your day through three complementary signals — what you **write**, what your **face shows**, and what you **tell it directly** — and turns those signals into a clear, honest picture of how you're doing over time.
+MindfulAI reads the emotional tide of your day through three complementary signals — what you **write**, what your **face shows**, and what you **tell it directly** — and turns those signals into a clear, honest picture of how you're doing over time.
 
-Unlike single-modal mood apps, Tideline combines:
+Unlike single-modal mood apps, MindfulAI combines:
 
-- **Text emotion analysis** via a fine-tuned DistilRoBERTa transformer (`j-hartmann/emotion-english-distilroberta-base`) — classifying journal entries and chat messages into seven emotion classes
+- **Text emotion analysis** via a fine-tuned DistilRoBERTa transformer (`j-hartmann/emotion-english-distilroberta-base`) — classifying journal entries into seven emotion classes
 - **Live facial emotion detection** via a Vision Transformer (`trpakov/vit-face-expression`) fed from a WebSocket webcam stream, throttled to one inference per second
 - **Self-reported mood logs** via a simple emoji/slider daily check-in
 
 All three signals are stored as derived labels — **raw video and audio are never persisted**.
+
+📖 **Research paper** — the design, its positioning against published mental-health agents (Woebot, Wysa, Tess), and a proposed validation protocol are described in [`paper/main.tex`](./paper/main.tex) (*MindfulAI: A Privacy-First Multi-Modal Framework for Emotion-Aware Mental Wellness Support*). Build it with `tectonic paper/main.tex`.
 
 ---
 
 ## Repository Layout
 
 ```
-Mindfulai/
+MindfulAI/
 ├── frontend/          # Astro + Tailwind multi-page website
 │   ├── src/
 │   │   ├── pages/     # One .astro file per route
@@ -59,6 +62,8 @@ Mindfulai/
 │   │   └── ml_models/
 │   └── README.md      ← Backend setup guide
 │
+├── paper/             # LaTeX source of the research paper
+│
 └── README.md          ← You are here
 ```
 
@@ -67,12 +72,12 @@ Mindfulai/
 ## Architecture at a Glance
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Browser (User)                       │
-│                                                          │
-│  Astro website (static HTML + React islands)             │
+┌───────────────────────────────────────────────────────┐
+│                     Browser (User)                     │
+│                                                        │
+│  Astro website (static HTML + React islands)           │
 │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │Dashboard │ │  Journal │ │   Chat   │ │  Trends  │  │
+│  │Dashboard │ │  Journal │ │ Live Check│ │  Trends  │  │
 │  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘  │
 │       │             │             │             │         │
 │       └─────────────┴─────────────┴─────────────┘        │
@@ -81,9 +86,9 @@ Mindfulai/
 └──────────────────────────┬──────────────────────────────┘
                            │  HTTP / WebSocket
                            ▼
-┌─────────────────────────────────────────────────────────┐
-│               FastAPI Backend  :8000                     │
-│                                                          │
+┌───────────────────────────────────────────────────────┐
+│               FastAPI Backend  :8000                    │
+│                                                        │
 │  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐  │
 │  │  REST API   │  │  WebSocket   │  │  ML Services  │  │
 │  │  /api/...   │  │ /ws/facial-  │  │  DistilRoBERTa│  │
@@ -96,7 +101,7 @@ Mindfulai/
 │          │     PostgreSQL (prod)          │               │
 │          │     SQLite     (dev)           │               │
 │          └───────────────────────────────┘               │
-└─────────────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -107,9 +112,9 @@ Mindfulai/
 |---|---|
 | **Dashboard** | Mood trend line chart, emotion distribution donut, stress/burnout risk score, quick check-in slider |
 | **Live check** | Webcam stream → face crop → ViT emotion classification at ~1 fps via WebSocket |
-| **Chat companion** | LLM-powered supportive chat with crisis-keyword detection and escalation banner |
-| **Journal** | Free-text entry with instant transformer-based emotion tagging |
-| **Trends** | Weekly heatmap, facial-vs-self-report correlation, PDF/CSV export |
+| **Pi camera** | Remote live-check from a Raspberry Pi camera stream over its own WebSocket |
+| **Journal** | Mood entries with instant transformer-based emotion tagging, plus opt-in note-source connectors (Keep, Notion, email, Apple Notes) |
+| **Trends** | Weekly heatmap, facial-vs-self-report correlation, risk score, PDF/CSV export |
 | **Settings** | Consent toggles, data export, GDPR-style data deletion |
 
 ---
@@ -121,7 +126,7 @@ Mindfulai/
 |---|---|---|
 | Framework | Astro 4.5 | Static-first multi-page site; JS only where needed via islands |
 | Styling | Tailwind CSS 3.4 | Design tokens in `tailwind.config.mjs` for consistency |
-| Interactive islands | React 18 + `client:visible` | Charts, webcam panel, chat window |
+| Interactive islands | React 18 + `client:visible` | Charts, webcam panel, journal composer |
 | Charts | Recharts 2.12 | Composable, accessible chart components |
 | HTTP client | Native `fetch` wrapper | Lightweight; typed via `apiClient.ts` |
 
@@ -152,8 +157,8 @@ python3 --version # >= 3.11
 ### 1 — Clone the repository
 
 ```bash
-git clone https://github.com/your-org/tideline.git
-cd tideline
+git clone https://github.com/adineo-cmd/mindfulai.git
+cd mindfulai
 ```
 
 ### 2 — Start the backend
@@ -201,20 +206,21 @@ SECRET_KEY=change-this-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 FRONTEND_URL=http://localhost:4321
-OPENAI_API_KEY=sk-...          # Optional — chat falls back to mock if absent
+OLLAMA_BASE_URL=http://localhost:11434   # Reserved for the roadmap LLM companion
+OLLAMA_MODEL=tinyllama
 ```
 
 ---
 
 ## Privacy & Ethics
 
-Mindfulai was built with privacy as a hard constraint, not an afterthought.
+MindfulAI was built with privacy as a hard constraint, not an afterthought.
 
 - **Raw video and audio are never stored.** The live-check WebSocket sends frames; only the resulting emotion label + timestamp reach the database.
-- **Explicit consent before camera activation.** The consent toggle state is stored per-user in `ConsentRecord`. Unchecking it immediately stops all webcam activity.
-- **Full data portability.** `/api/user/data` returns a complete JSON export of everything linked to your account.
-- **Right to erasure.** `DELETE /api/user/data` hard-deletes all user records, compliant with GDPR Article 17.
-- **Crisis detection.** The chat pipeline scans for self-harm keywords and returns `requires_human_support: true` instead of a bot reply when triggered, surfacing crisis resource information to the user.
+- **Explicit consent before camera activation.** The consent toggle state is stored per-user in `ConsentRecord` (`GET/PUT /api/privacy/consent`). Unchecking it immediately stops all webcam activity.
+- **Full data portability.** `GET /api/privacy/export` returns a complete JSON export of everything linked to your account.
+- **Right to erasure.** `DELETE /api/privacy/data` hard-deletes all user records, compliant with GDPR Article 17.
+- **Crisis resources, not chatbots.** Exported PDF reports and the interface carry explicit crisis-resource disclaimers. A supportive-dialogue companion with automated escalation is on the roadmap, not in production — the system ships no unmonitored conversational AI.
 - **No data sharing.** All emotion records are scoped to `user_id`; aggregate analytics are server-side only and never expose individual records.
 
 ---
@@ -223,7 +229,7 @@ Mindfulai was built with privacy as a hard constraint, not an afterthought.
 
 This is a final-year academic project. The codebase is production-structured but the following are known limitations for a real deployment:
 
-- The chat module uses `tinyllama` (Ollama) and gracefully degrades to a mock response without an API key.
+- The Ollama configuration (`tinyllama`) is reserved for the planned supportive-dialogue companion; the conversational module itself is not implemented yet.
 - ML models are downloaded from HuggingFace on first inference. In production, pre-warm `model_cache` during startup.
 - Auth endpoints exist but the demo stubs use `user_id = 1`. Wire in `get_current_user` (marked in comments) for real authentication.
 
@@ -231,7 +237,7 @@ This is a final-year academic project. The codebase is production-structured but
 
 ## Contributing
 
-Pull requests are welcome. Please open an issue first to discuss significant changes.
+Pull requests are welcome. Please read [`CONTRIBUTING.md`](./CONTRIBUTING.md) first — it covers the privacy ground rules, the development workflow, and the CI checks every PR must pass. Open an issue to discuss significant changes.
 
 ---
 

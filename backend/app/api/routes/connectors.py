@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.connector import ConnectorConnectRequest, ConnectorSyncRequest
@@ -14,13 +14,13 @@ def get_available_connectors():
 
 @router.get("/sources")
 def get_connected_sources(
-    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    user_id: int = Query(default=1),
     db: Session = Depends(get_db)
 ):
     """Get all connected sources for current user"""
     sources = db.query(ExternalSource).filter(
         ExternalSource.user_id == user_id,
-        ExternalSource.is_connected == True
+        ExternalSource.is_connected
     ).all()
     
     return {
@@ -39,7 +39,7 @@ def get_connected_sources(
 @router.post("/connect")
 def connect_source(
     request: ConnectorConnectRequest, 
-    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    user_id: int = Query(default=1),
     db: Session = Depends(get_db)
 ):
     """Connect to an external data source"""
@@ -51,7 +51,7 @@ def connect_source(
 @router.post("/sync")
 def sync_source(
     request: ConnectorSyncRequest, 
-    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    user_id: int = Query(default=1),
     db: Session = Depends(get_db)
 ):
     """Sync data from connected source"""
@@ -60,7 +60,7 @@ def sync_source(
 
 @router.get("/notes")
 def get_imported_notes(
-    user_id: int = Query(default=1),  # Dynamic user ID from frontend
+    user_id: int = Query(default=1),
     db: Session = Depends(get_db)
 ):
     """Get all imported notes"""

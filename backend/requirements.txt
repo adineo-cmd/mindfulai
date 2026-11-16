@@ -18,7 +18,7 @@ email-validator==2.1.0
 
 # --- AI & Machine Learning ---
 transformers==4.38.1
-huggingface-hub==0.20.0
+huggingface-hub==2.4.0
 torch==2.2.1
 opencv-python-headless==4.9.0.80
 vaderSentiment==3.3.2

@@ -22,7 +22,7 @@ huggingface-hub==0.20.0
 torch==2.2.1
 opencv-python-headless==4.9.0.80
 vaderSentiment==3.3.2
-numpy<2.0
+numpy<3.0
 
 # --- LLM Integration (Open Source) ---
 ollama==0.1.8
